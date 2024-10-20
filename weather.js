@@ -3,7 +3,6 @@ import { getArgs } from "./helpers/arg.js";
 import { getWeather } from "./services/api.service.js";
 import { printHelp, printSuccess, printError } from "./services/log.service.js";
 import { saveKeyValue, TOKEN_DICTIONARY } from "./services/storage.service.js";
-
 const saveToken = async (token) => {
   if (!token.length) {
     printError("Не передан токен");
