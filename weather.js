@@ -5,16 +5,32 @@ import { printHelp, printSuccess, printError } from "./services/log.service.js";
 import { saveKeyValue, TOKEN_DICTIONARY } from "./services/storage.service.js";
 const saveToken = async (token) => {
   if (!token.length) {
-    printError("Не передан токен");
+    printError("Не передан token");
     return;
   }
   try {
     await saveKeyValue(TOKEN_DICTIONARY.token, token);
-    printSuccess("Токен сохранен");
+    printSuccess("Токен сохранён");
   } catch (e) {
     printError(e.message);
   }
 };
+
+const getForcast = async () => {
+  try {
+    const weather = await getWeather(process.env.CITY);
+    console.log(weather);
+  } catch (e) {
+    if (e?.response?.status == 404) {
+      printError("Неверно указан город");
+    } else if (e?.response?.status == 401) {
+      printError("Неверно указан токен");
+    } else {
+      printError(e.message);
+    }
+  }
+};
+
 const initCLI = () => {
   const args = getArgs(process.argv);
   if (args.h) {
@@ -25,6 +41,7 @@ const initCLI = () => {
   if (args.t) {
     return saveToken(args.t);
   }
-  getWeather("moscow");
+  getForcast();
 };
+
 initCLI();
