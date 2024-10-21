@@ -1,5 +1,5 @@
 {
-  "name": "weather-cli",
+  "name": "weather-cli-node-enagtim",
   "version": "1.0.0",
   "description": "CLI for getting weather",
   "main": "weather.js",
