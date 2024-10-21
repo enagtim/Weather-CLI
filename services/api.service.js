@@ -1,6 +1,5 @@
 import { getKeyValue, TOKEN_DICTIONARY } from "./storage.service.js";
 import axios from "axios";
-
 const getIcon = (icon) => {
   switch (icon.slice(0, -1)) {
     case "01":
@@ -44,5 +43,4 @@ const getWeather = async (city) => {
   );
   return data;
 };
-
 export { getWeather, getIcon };

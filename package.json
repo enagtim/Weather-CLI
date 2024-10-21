@@ -8,7 +8,7 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node weather.js"
   },
   "repository": {
     "type": "git",
