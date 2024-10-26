@@ -12,6 +12,7 @@ import {
   saveKeyValue,
   TOKEN_DICTIONARY,
 } from "./services/storage.service.js";
+
 const saveToken = async (token) => {
   if (!token.length) {
     printError("Не передан token");
@@ -24,23 +25,33 @@ const saveToken = async (token) => {
     printError(e.message);
   }
 };
-const saveCity = async (city) => {
-  if (!city.length) {
-    printError("Не передан город");
+const saveCity = async (cities) => {
+  if (!cities.length) {
+    printError("Не переданы города!");
     return;
   }
+  const citiesArr = cities.split(", ").map(city => city.trim())
   try {
-    await saveKeyValue(TOKEN_DICTIONARY.city, city);
-    printSuccess("Город сохранён");
+    for(const city of citiesArr){
+      await saveKeyValue(TOKEN_DICTIONARY.cities, city);
+    }
+    printSuccess("Города сохранены!");
   } catch (e) {
     printError(e.message);
   }
 };
 const getForcast = async () => {
   try {
-    const city = process.env.CITY ?? (await getKeyValue(TOKEN_DICTIONARY.city));
-    const weather = await getWeather(city);
-    printWeather(weather, getIcon(weather.weather[0].icon));
+    const cities = await getKeyValue(TOKEN_DICTIONARY.cities);
+    if(cities.length === 0){
+      printError("Не сохранены города для отображения!");
+      return;
+    };
+    const weatherPromises = cities.map(city => getWeather(city));
+    const weatherResults = await Promise.all(weatherPromises); 
+    weatherResults.forEach((weather, index) => {
+      printWeather(weather, getIcon(weather.weather[0].icon), cities[index])
+    });
   } catch (e) {
     if (e?.response?.status == 404) {
       printError("Неверно указан город");
