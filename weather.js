@@ -30,16 +30,25 @@ const saveCity = async (cities) => {
     printError("Не переданы города!");
     return;
   }
-  const citiesArr = cities.split(", ").map(city => city.trim())
+  const citiesArr = cities.split(",").map(city => city.trim()).filter(city => city);
   try {
-    for(const city of citiesArr){
-      await saveKeyValue(TOKEN_DICTIONARY.cities, city);
-    }
+    const existingCities = (await getKeyValue(TOKEN_DICTIONARY.cities)) || [];
+    const updatedCities = Array.from(new Set([...existingCities, ...citiesArr]));
+
+    await saveKeyValue(TOKEN_DICTIONARY.cities, updatedCities);
     printSuccess("Города сохранены!");
   } catch (e) {
     printError(e.message);
   }
 };
+export let currentLanguage = "en";
+const setLanguage = async (lang) => {
+  if (["en", "ru"].includes(lang)) {
+    await saveKeyValue(TOKEN_DICTIONARY.language, lang);
+    currentLanguage = lang;
+  }
+};
+
 const getForcast = async () => {
   try {
     const cities = await getKeyValue(TOKEN_DICTIONARY.cities);
@@ -72,6 +81,9 @@ const initCLI = () => {
   }
   if (args.t) {
     return saveToken(args.t);
+  }
+  if (args.l) {
+    return setLanguage(args.l);
   }
   return getForcast();
 };

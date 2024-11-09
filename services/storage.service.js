@@ -17,12 +17,7 @@ const saveKeyValue = async (key, value) => {
     data[key] = value;
   }
   if(key === TOKEN_DICTIONARY.cities){
-    if(!data[key]){
-      data[key] = []
-    }
-    if(!data[key].includes(value)){
-      data[key].push(value);
-    }
+    data[key] = [...new Set([...(data[key] || []), ...value])]; 
   }else {
     data[key] = value;
   }
