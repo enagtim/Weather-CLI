@@ -30,13 +30,14 @@ const getWeather = async (city) => {
       "Не задан ключ API, задайте его через команду -t [API_KEY]"
     );
   }
+  const language = (await getKeyValue(TOKEN_DICTIONARY.language)) || 'en';
   const { data } = await axios.get(
     "https://api.openweathermap.org/data/2.5/weather",
     {
       params: {
         q: city,
         appid: token,
-        lang: "ru",
+        lang: language,
         units: "metric",
       },
     }

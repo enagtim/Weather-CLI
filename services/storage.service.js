@@ -4,7 +4,8 @@ import { promises } from "fs";
 const filePath = join(homedir(), "weather-data.json");
 const TOKEN_DICTIONARY = {
   token: "token",
-  city: "city",
+  cities: "cities",
+  language: "launguage",
 };
 const saveKeyValue = async (key, value) => {
   let data = {};
@@ -12,7 +13,14 @@ const saveKeyValue = async (key, value) => {
     const file = await promises.readFile(filePath);
     data = JSON.parse(file);
   }
-  data[key] = value;
+  if(key === TOKEN_DICTIONARY.language){
+    data[key] = value;
+  }
+  if(key === TOKEN_DICTIONARY.cities){
+    data[key] = [...new Set([...(data[key] || []), ...value])]; 
+  }else {
+    data[key] = value;
+  }
   await promises.writeFile(filePath, JSON.stringify(data));
 };
 const getKeyValue = async (key) => {

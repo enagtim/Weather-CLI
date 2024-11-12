@@ -12,6 +12,7 @@ import {
   saveKeyValue,
   TOKEN_DICTIONARY,
 } from "./services/storage.service.js";
+
 const saveToken = async (token) => {
   if (!token.length) {
     printError("Не передан token");
@@ -24,23 +25,42 @@ const saveToken = async (token) => {
     printError(e.message);
   }
 };
-const saveCity = async (city) => {
-  if (!city.length) {
-    printError("Не передан город");
+const saveCity = async (cities) => {
+  if (!cities.length) {
+    printError("Не переданы города!");
     return;
   }
+  const citiesArr = cities.split(",").map(city => city.trim()).filter(city => city);
   try {
-    await saveKeyValue(TOKEN_DICTIONARY.city, city);
-    printSuccess("Город сохранён");
+    const existingCities = (await getKeyValue(TOKEN_DICTIONARY.cities)) || [];
+    const updatedCities = Array.from(new Set([...existingCities, ...citiesArr]));
+
+    await saveKeyValue(TOKEN_DICTIONARY.cities, updatedCities);
+    printSuccess("Города сохранены!");
   } catch (e) {
     printError(e.message);
   }
 };
+export let currentLanguage = "en";
+const setLanguage = async (lang) => {
+  if (["en", "ru"].includes(lang)) {
+    await saveKeyValue(TOKEN_DICTIONARY.language, lang);
+    currentLanguage = lang;
+  }
+};
+
 const getForcast = async () => {
   try {
-    const city = process.env.CITY ?? (await getKeyValue(TOKEN_DICTIONARY.city));
-    const weather = await getWeather(city);
-    printWeather(weather, getIcon(weather.weather[0].icon));
+    const cities = await getKeyValue(TOKEN_DICTIONARY.cities);
+    if(cities.length === 0){
+      printError("Не сохранены города для отображения!");
+      return;
+    };
+    const weatherPromises = cities.map(city => getWeather(city));
+    const weatherResults = await Promise.all(weatherPromises); 
+    weatherResults.forEach((weather, index) => {
+      printWeather(weather, getIcon(weather.weather[0].icon), cities[index])
+    });
   } catch (e) {
     if (e?.response?.status == 404) {
       printError("Неверно указан город");
@@ -61,6 +81,9 @@ const initCLI = () => {
   }
   if (args.t) {
     return saveToken(args.t);
+  }
+  if (args.l) {
+    return setLanguage(args.l);
   }
   return getForcast();
 };
